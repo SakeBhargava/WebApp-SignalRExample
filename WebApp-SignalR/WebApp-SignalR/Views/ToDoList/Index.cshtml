@@ -1,0 +1,51 @@
+﻿@model IEnumerable<string>
+    @{
+        ViewBag.Title = "SignalR-App";
+    }
+                <div>
+                    <div>
+                            <input type="text" id="txtToDoItem" name="toDoItem"/>
+                            <input type="button" id="btnAddItem" value="Add Item"/>
+                    </div>
+
+                    <div>
+                        <h3>ToDo List:</h3>
+                        <ul id="todo-list">
+                            @foreach (var item in Model)
+                            {
+                                <li>@item</li>
+                            }
+                        </ul>
+
+                    </div>
+                </div>
+
+@section scripts {
+<script src="~/Scripts/jquery.signalR-2.2.2.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script type="text/javascript">
+        $(function () {
+            // Reference the auto-generated proxy for the hub.
+            var todoList = $.connection.toDoListHub;
+            // Create a function that the hub can call back to display item.
+            todoList.client.addItem = function (item) {
+                // Add the item to the page.
+                $('#todo-list').append('<li>' + htmlEncode(item) + '</li>');
+            };
+            // Start the connection.
+            $.connection.hub.start().done(function () {
+                $('#btnAddItem').click(function () {
+                    // Call the Send method on the hub.
+                    todoList.server.addItem($('#txtToDoItem').val());
+                    // Clear text box and reset focus for next comment.
+                    $('#txtToDoItem').val('').focus();
+                });
+            });
+        });
+        // This optional function html-encodes messages for display in the page.
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+</script>
+  }
